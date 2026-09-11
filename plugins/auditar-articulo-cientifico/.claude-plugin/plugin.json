@@ -1,0 +1,10 @@
+{
+  "name": "auditar-articulo-cientifico",
+  "version": "1.0.0",
+  "description": "Auditoría metodológica de artículos con regresión lineal: reconstruye n, recalcula pruebas y ejecuta el diagnóstico que el artículo omitió, sin acceso a los datos originales.",
+  "author": {
+    "name": "Javier Rebull",
+    "url": "https://github.com/jrebull"
+  },
+  "keywords": ["regresión", "auditoría", "estadística", "investigación", "LaTeX"]
+}

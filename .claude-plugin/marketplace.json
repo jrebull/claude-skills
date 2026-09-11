@@ -1,0 +1,18 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "jrebull-skills",
+  "description": "Skills de Claude Code para trabajo académico y auditoría metodológica.",
+  "owner": {
+    "name": "Javier Rebull",
+    "url": "https://github.com/jrebull"
+  },
+  "plugins": [
+    {
+      "name": "auditar-articulo-cientifico",
+      "source": "./plugins/auditar-articulo-cientifico",
+      "description": "Método para auditar un artículo científico aplicado que usa regresión lineal y producir una ficha de auditoría defendible, recalculando el modelo desde las propias tablas del artículo.",
+      "version": "1.0.0",
+      "category": "research"
+    }
+  ]
+}
