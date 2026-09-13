@@ -1,6 +1,6 @@
 {
   "name": "anteproyecto-uacj-latex",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Plantilla LaTeX genérica del Anteproyecto de Innovación Tecnológica (MIAAD, UACJ): formato completo con logo, reglas de compilación para pdfLaTeX/Overleaf, validador estático y compilador con censo del log.",
   "author": {
     "name": "Javier Rebull",

@@ -30,7 +30,7 @@
 \newcommand{\Instituto}{Instituto de Ingeniería y Tecnología}
 \newcommand{\Departamento}{Departamento de Ingeniería Eléctrica y Computación}
 \newcommand{\CiudadPortada}{Ciudad Juárez, Chihuahua}
-\newcommand{\FechaPortada}{Mayo 2026}
+\newcommand{\FechaPortada}{Mes Año}
 
 % --- Paquetes (conjunto cerrado y probado; no añadir sin motivo) ---
 \usepackage[utf8]{inputenc}
@@ -152,6 +152,7 @@
 % ------------------------------------------------------------
 % PORTADA (no tocar la estructura; los datos vienen del bloque de arriba)
 % ------------------------------------------------------------
+\hypersetup{pageanchor=false}% la portada no es «página 1» del cuerpo: evita el aviso «destination with the same identifier»
 \begin{titlepage}
 \begin{spacing}{1.2}
 \setlength{\parskip}{0pt}
@@ -191,6 +192,7 @@
 % ------------------------------------------------------------
 \pagenumbering{roman}
 \setcounter{page}{2}
+\hypersetup{pageanchor=true}
 
 \chapter*{Declaración de Originalidad}
 \begin{spacing}{2.0}
@@ -351,12 +353,12 @@ Por qué el problema importa, a quién beneficia y por qué el enfoque propuesto
 
 \subsection{2.1.1 Concepto fundamental}
 
-Definir los conceptos con sus símbolos la primera vez que aparecen. Las ecuaciones se numeran de corrido, sin punto de capítulo: la Ecuación~\eqref{eq:mase} define la métrica MASE (\textit{Mean Absolute Scaled Error}) como
+Definir los conceptos con sus símbolos la primera vez que aparecen. Las ecuaciones se numeran de corrido, sin punto de capítulo: la Ecuación~\eqref{eq:rmse} define la raíz del error cuadrático medio (\textit{Root Mean Squared Error}, RMSE) como
 \begin{equation}
-    \text{MASE} = \frac{\frac{1}{H}\sum_{h=1}^{H} \lvert y_{t+h} - \hat{y}_{t+h} \rvert}{\frac{1}{T-m}\sum_{t=m+1}^{T} \lvert y_t - y_{t-m} \rvert},
-    \label{eq:mase}
+    \text{RMSE} = \sqrt{\frac{1}{n}\sum_{i=1}^{n} \left( y_i - \hat{y}_i \right)^2},
+    \label{eq:rmse}
 \end{equation}
-donde $H$ es el horizonte, $T$ la longitud de la serie de entrenamiento y $m$ el periodo estacional. Las métricas se definen con fórmula UNA sola vez; el resto del documento las nombra y remite a esta sección.
+donde $n$ es el número de observaciones evaluadas, $y_i$ el valor real y $\hat{y}_i$ el valor estimado. Las métricas se definen con fórmula UNA sola vez; el resto del documento las nombra y remite a esta sección.
 
 \subsection{2.1.2 Segundo concepto}
 
@@ -612,9 +614,9 @@ Cómo reproducir los resultados (entorno, órdenes, datos).
 \emergencystretch=3em
 \begin{description}[leftmargin=0pt, labelindent=0pt, itemindent=0pt, labelsep=0.4em,
                     font=\bfseries\scriptsize, itemsep=2pt, parsep=0pt, topsep=0pt]
-    \item[MASE] (\textit{Mean Absolute Scaled Error})\hspace{0.3em}Error absoluto medio escalado por el error del pronóstico ingenuo; comparable entre series de distinta escala.
     \item[ML] (\textit{Machine Learning})\hspace{0.3em}Aprendizaje automático: familia de métodos que ajustan modelos a partir de datos.
-    \item[Walk-forward] Validación temporal con ventana de entrenamiento expansible y evaluación sobre observaciones posteriores.
+    \item[RMSE] (\textit{Root Mean Squared Error})\hspace{0.3em}Raíz del error cuadrático medio; penaliza más los errores grandes y se expresa en las unidades de la variable.
+    \item[Validación cruzada] Procedimiento que reserva una parte de los datos para estimar el desempeño sobre observaciones no usadas al ajustar.
 \end{description}
 \end{multicols}
 

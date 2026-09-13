@@ -1,7 +1,7 @@
 # Reglas y trampas del formato (con su motivo)
 
 Catálogo completo de lo que la plantilla ya resuelve y de lo que rompe la compilación o el formato.
-Cada regla nace de un fallo real ocurrido al preparar el anteproyecto de mayo de 2026.
+Cada regla nace de un fallo reproducido al compilar con pdfLaTeX y babel-spanish.
 
 ## A. Preámbulo (no tocar)
 
@@ -11,27 +11,29 @@ Cada regla nace de un fallo real ocurrido al preparar el anteproyecto de mayo de
 | Fuente | `mathptmx` | Times Roman en texto y matemáticas |
 | Márgenes | `geometry` 1.25 in laterales, 1 in arriba/abajo | lineamiento del curso |
 | Idioma | `babel[spanish,es-tabla,es-nodecimaldot]` | `es-tabla` → «Tabla»; `es-nodecimaldot` → punto decimal |
-| Interlineado | `\setstretch{1.10}` + `\parskip 0.4em` | compactación aprobada; portada `spacing{1.2}`, firma `spacing{2.0}` |
+| Interlineado | `\setstretch{1.10}` + `\parskip 0.4em` | interlineado del formato; portada `spacing{1.2}`, firma `spacing{2.0}` |
 | Títulos | `titlesec`: capítulo centrado 16 pt, secciones en negritas sin número | `\@chapapp` vacío quita «Capítulo» |
-| Índices | `tocloft` con `\cftfigpresnum{Figura~}` y `\cfttabpresnum{Tabla~}` | observación del director: prefijo en los índices |
+| Índices | `tocloft` con `\cftfigpresnum{Figura~}` y `\cfttabpresnum{Tabla~}` | los índices muestran «Figura N:» y «Tabla N:», no sólo el número |
 | Folio | `fancyhdr` sólo pie centrado | sin encabezados |
 | Contadores | `chngcntr`: `\counterwithout{figure/table/equation}{chapter}` | Figura 1, 2, 3… y ecuaciones (1), (2), sin `1.1` |
 | Secciones | `\setcounter{secnumdepth}{0}` | el número va escrito en el título |
 | Citas | `\newcommand{\cita}[1]{\hyperref[bib:#1]{[#1]}}` | IEEE clicable |
-| Hipervínculos | `hyperref` con `colorlinks=false, pdfborder={0 0 0}` | sin recuadros |
+| Hipervínculos | `hyperref` con `colorlinks=false, pdfborder={0 0 0}`; `pageanchor=false` sólo en la portada | sin recuadros; evita el aviso «destination with the same identifier (page.1)» |
 | URLs | `url[hyphens]` + `\g@addto@macro{\UrlBreaks}{\UrlOrds}` | quiebre en cualquier carácter |
 | Cronograma | `pdflscape` | hoja apaisada sin girar el resto |
 
-Paquetes probados como añadidos en documentos hermanos: `booktabs` (`\toprule/\midrule/\bottomrule`),
-`algorithm` + `algpseudocode` (con `\floatname{algorithm}{Algoritmo}`). Cualquier otro se documenta
-en el preámbulo antes de usarse.
+Paquetes que se han añadido sin conflicto en documentos del mismo formato: `booktabs`
+(`\toprule/\midrule/\bottomrule`), `algorithm` + `algpseudocode` (con `\floatname{algorithm}{Algoritmo}`).
+Cualquier otro se documenta en el preámbulo antes de usarse. Los paquetes de fuentes (`lmodern`, `times`,
+`fontspec`) cambian la tipografía en silencio: `validar.py` los avisa.
 
 ## B. Trampas de babel-spanish
 
-1. **`\%` en modo matemático** choca con `\,` → `! Missing $ inserted` o espaciado roto. Escribir
-   siempre `12.5\,\%` y `$<$\,0.5\,\%`.
-2. **`\shorthandoff{.}`** rompe babel moderno (≥ v5): el punto ya no es shorthand activo; basta
-   `es-nodecimaldot`.
+1. **`\%` en modo matemático**: babel redefine `\%` y con el espacio fino da `$12.5\,\%$` →
+   `! Incompatible glue units` (en `\es@sppercent`). `$12.5\%$` a secas compila, pero se prohíbe igual
+   para no depender de ese detalle. Escribir siempre `12.5\,\%` y `$<$\,0.5\,\%` en modo texto.
+2. **`\shorthandoff{.}`** rompe babel moderno (≥ v5) con `! Package babel Error: I can't switch '.' on
+   or off--not a shorthand`; basta `es-nodecimaldot`.
 3. **`<` y `>` son caracteres activos**: en TikZ, `shorten <=`/`shorten >=` produce
    `Argument of \language@active@arg< has an extra }`. Solución: `([xshift=2pt]a.east) --
    ([xshift=-2pt]b.west)`. En math (`$<$`) están protegidos.
@@ -41,7 +43,8 @@ en el preámbulo antes de usarse.
 
 - Toda figura: `\begin{figure}[H]` + `\centering` + `\caption[corto]{largo}` + `\label{fig:x}` y al
   menos un `\ref{fig:x}` en el texto. Igual las tablas con `tab:`.
-- `\includegraphics{nombre.png}` sin ruta: `\graphicspath{{Figures/}}` ya la resuelve.
+- `\includegraphics{nombre.png}` sin ruta: `\graphicspath{{Figures/}}` ya la resuelve (con ruta también
+  compila, pero el formato la prohíbe y `validar.py` la marca).
 - Captions describen **contenido**, no estilo («paleta institucional», «borde azul» no van) y cierran
   con «Fuente: elaboración propia.» o la fuente real.
 - Tablas con `p{}`: desbordan si `suma(anchos) + 2·ncols·\tabcolsep > \textwidth` (15.24 cm = 6 in);
@@ -52,16 +55,19 @@ en el preámbulo antes de usarse.
   producto en el secundario, pie gris itálico; **mismo `minimum width`/`minimum height` en todas**, `inner sep=0pt, outer sep=0pt`,
   y la geometría (anchos, separación, centros) escrita en un comentario al inicio del bloque. La suma
   de anchos y separaciones no puede superar 15.24 cm (el overfull aparece en el log).
-- Fotos circulares: `\clip (0,0) circle (r); \node at (0,0) {\includegraphics[width=2r]{foto}}`.
+- Fotos circulares (opcional, no incluido en la plantilla): `\clip (0,0) circle (r); \node at (0,0)
+  {\includegraphics[width=2r]{foto}}` dentro de un `tikzpicture`.
 
 ## D. Cronograma apaisado
 
 - `\begin{landscape}` + `\thispagestyle{empty}` + `\noindent\begin{minipage}[c][\textheight][c]{\linewidth}`
   (centrado vertical en una sola hoja; `\vfill` lo parte en tres).
-- **Nunca** `\begin{table}[H]` dentro de `landscape` (hoja en blanco antes del cuadro): usar
-  `\captionof{table}` con `\captionsetup{hypcap=false}`.
-- Tabular `|p{4.6cm}|*{10}{cccc|}` = 41 columnas; cada fila de actividad tiene exactamente **40 `&`**;
-  la fila de meses son 10 `\multicolumn{4}`; las bandas `\multicolumn{41}`.
+- **Nunca** `\begin{table}[H]` dentro de `landscape`: un flotante ahí puede desplazar el cuadro o dejar
+  una hoja apaisada en blanco según el contexto; el patrón del formato es `\captionof{table}` con
+  `\captionsetup{hypcap=false}` dentro de la minipage.
+- Tabular `|p{4.6cm}|*{10}{cccc|}` = 41 columnas; cada fila de actividad tiene exactamente **40 `&`**
+  (con menos, la fila pierde el borde derecho sin ningún error; `validar.py` los cuenta); la fila de
+  meses son 10 `\multicolumn{4}`; las bandas `\multicolumn{41}`.
 - Celdas: `\cellcolor{colorprimario!60}` activas, `\cellcolor{colorsecundario!85}` hitos,
   `\cellcolor{colorgris!25}` receso. `\resizebox{\linewidth}{!}{…}` evita el desborde.
 
@@ -80,7 +86,8 @@ en el preámbulo antes de usarse.
   metodológica», sin umbrales numéricos comprometidos en hipótesis, preguntas abiertas.
 - Acrónimos: una sola definición, patrón `término (\textit{English term}, ACR)`.
 - Métricas con fórmula **una sola vez** (Marco Teórico); el resto nombra y remite.
-- Decimales con punto, millares con coma (12,345).
+- Decimales con punto, millares con coma (12,345). La portada dice «Anteproyecto de investigación
+  presentado por», que es el texto literal del formato institucional.
 - Incisos con paréntesis o comas; sin rayas largas de inciso ni `--` tipográfico en prosa.
 - Resumen autocontenido: sin citas ni referencias cruzadas, ~200 palabras, en futuro.
 
@@ -91,5 +98,5 @@ python3 validar.py archivo.tex          # begin/end, citas, labels, prohibicione
 bash compilar.sh archivo.tex            # 3 pasadas + censo: errores, overfull, underfull, indefinidas
 ```
 
-Gate de entrega: 0 errores, 0 overfull, 0 indefinidas; underfull sólo cosmético (tablas estrechas,
-URLs). Y siempre abrir el PDF: lo encimado no lo reporta ningún log.
+Gate de entrega: `compilar.sh` sale con 1 si hay errores, overfull o indefinidas; underfull sólo es
+cosmético (tablas estrechas, URLs). Y siempre abrir el PDF: lo encimado no lo reporta ningún log.

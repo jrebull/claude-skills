@@ -25,6 +25,11 @@ from pathlib import Path
 
 ERR, WARN = "ERROR", "AVISO"
 
+try:  # Windows con consola cp1252: no reventar por ✓/✗/–
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+except (AttributeError, ValueError):
+    pass
+
 
 def sin_comentarios(texto: str) -> str:
     out = []
@@ -52,6 +57,7 @@ def validar(ruta: Path, figures: Path) -> list[tuple[str, str]]:
     txt = sin_comentarios(raw)
     # \verb|...| se descarta antes de cualquier regla: su contenido es literal, no LaTeX
     txt = re.sub(r"\\verb(.)(.*?)\1", "", txt)
+    txt = re.sub(r"\\begin\{verbatim\}.*?\\end\{verbatim\}", "", txt, flags=re.S)
     hall: list[tuple[str, str]] = []
 
     # 1. begin/end
@@ -118,7 +124,7 @@ def validar(ruta: Path, figures: Path) -> list[tuple[str, str]]:
                 if "\\end{figure}" in sig or "\\end{table}" in sig or "\\end{minipage}" in sig:
                     break
             if "\\label{" not in "\n".join(ventana_lineas):
-                hall.append((WARN, f"línea {i + 1}: \\caption sin \\label antes del cierre del flotante"))
+                hall.append((ERR, f"línea {i + 1}: \\caption sin \\label antes del cierre del flotante"))
     # includegraphics
     for m in re.finditer(r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}", txt):
         nombre = m.group(1).strip()
@@ -150,16 +156,40 @@ def validar(ruta: Path, figures: Path) -> list[tuple[str, str]]:
                 en_math = not en_math
             j += 1
     for m in re.finditer(r"\\begin\{landscape\}(.*?)\\end\{landscape\}", txt, re.S):
-        if "\\begin{table}" in m.group(1):
-            hall.append((ERR, "\\begin{table} dentro de landscape genera una hoja en blanco: usar \\captionof{table}"))
-    if "\\usepackage" in txt and "\\usepackage[spanish" not in txt:
-        hall.append((WARN, "babel spanish no detectado"))
+        bloque = m.group(1)
+        if "\\begin{table}" in bloque:
+            hall.append((ERR, "\\begin{table} dentro de landscape: el patrón del formato es \\captionof{table} en la minipage (un flotante ahí puede desplazar el cuadro o dejar una hoja en blanco)"))
+        # cada fila del cuadro de actividades: 1 celda de actividad + 40 semanas = 40 '&' sin escapar
+        tab = re.search(r"\\begin\{tabular\}(.*?)\\end\{tabular\}", bloque, re.S)
+        if tab:
+            filas = re.split(r"\\\\", tab.group(1))
+            malas = []
+            for fila in filas:
+                amps = len(re.findall(r"(?<!\\)&", fila))
+                if amps == 0 or "multicolumn{41}" in fila:
+                    continue
+                esperado = 10 if fila.count("multicolumn{4}") >= 9 else 40
+                if amps != esperado:
+                    malas.append(f"{amps} '&' (esperados {esperado}) en «{fila.strip()[:40]}…»")
+            if malas:
+                hall.append((ERR, f"cronograma: {len(malas)} fila(s) con separadores de más o de menos: " + "; ".join(malas[:3])))
+    babel = re.search(r"\\usepackage\[([^\]]*)\]\{babel\}", txt)
+    if not babel or "spanish" not in babel.group(1):
+        hall.append((ERR, "babel con opción spanish no detectado"))
+    else:
+        for opcion, efecto in (("es-nodecimaldot", "sin ella $3.14$ se imprime «3,14»"), ("es-tabla", "sin ella las tablas se llaman «Cuadro»")):
+            if opcion not in babel.group(1):
+                hall.append((ERR, f"babel sin la opción {opcion}: {efecto}"))
+    for paquete in ("lmodern", "times", "fontspec", "helvet", "libertine", "newtxtext"):
+        if re.search(r"\\usepackage(?:\[[^\]]*\])?\{" + paquete + r"\}", txt):
+            hall.append((WARN, f"\\usepackage{{{paquete}}} altera la fuente del formato (Times por mathptmx); retirarlo salvo motivo documentado"))
     # Paleta: los colores se usan por NOMBRE definido con \definecolor (la plantilla trae cuatro);
     # un color con código suelto en el cuerpo (\rowcolor[HTML]{...}) escapa a cualquier recoloreo.
     definidos = set(re.findall(r"\\definecolor\{([A-Za-z0-9_]+)\}", txt))
     if len(definidos) < 4:
         hall.append((WARN, f"sólo {len(definidos)} \\definecolor: la plantilla define cuatro nombres de paleta"))
-    estandar = {"white", "black", "gray", "grey", "red", "blue", "green", "yellow", "cyan", "magenta", "orange", "lightgray", "darkgray", "none"}
+    estandar = {"white", "black", "gray", "grey", "darkgray", "lightgray", "red", "green", "blue", "cyan", "magenta", "yellow",
+                "brown", "lime", "olive", "orange", "pink", "purple", "teal", "violet", "none"}
     usados = set()
     for m in re.finditer(r"\\(?:rowcolor|cellcolor|textcolor|color|arrayrulecolor)\{([A-Za-z0-9_]+)(?:![0-9]+)?\}", txt):
         usados.add(m.group(1))
@@ -187,7 +217,14 @@ def main() -> int:
         print(__doc__)
         return 2
     ruta = Path(sys.argv[1])
-    figures = Path(sys.argv[sys.argv.index("--figures") + 1]) if "--figures" in sys.argv else ruta.parent / "Figures"
+    if "--figures" in sys.argv:
+        idx = sys.argv.index("--figures")
+        if idx + 1 >= len(sys.argv):
+            print("uso: validar.py <archivo.tex> [--figures <carpeta>]")
+            return 2
+        figures = Path(sys.argv[idx + 1])
+    else:
+        figures = ruta.parent / "Figures"
     hall = validar(ruta, figures)
     errores = 0
     for sev, msg in hall:

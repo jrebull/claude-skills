@@ -18,7 +18,7 @@
       "name": "anteproyecto-uacj-latex",
       "source": "./plugins/anteproyecto-uacj-latex",
       "description": "Plantilla LaTeX genérica y reglas de compilación del Anteproyecto de Innovación Tecnológica de la MIAAD (UACJ): portada con logo, índices con «Figura N:», numeración continua, citas IEEE clicables, cronograma apaisado, validador estático y compilador con censo del log.",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "academic"
     }
   ]
