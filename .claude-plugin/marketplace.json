@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "jrebull-skills",
-  "description": "Skills de Claude Code para trabajo académico y auditoría metodológica.",
+  "description": "Skills de Claude Code para trabajo académico: auditoría metodológica y formato del anteproyecto MIAAD-UACJ.",
   "owner": {
     "name": "Javier Rebull",
     "url": "https://github.com/jrebull"
@@ -13,6 +13,13 @@
       "description": "Método para auditar un artículo científico aplicado que usa regresión lineal y producir una ficha de auditoría defendible, recalculando el modelo desde las propias tablas del artículo.",
       "version": "1.0.0",
       "category": "research"
+    },
+    {
+      "name": "anteproyecto-uacj-latex",
+      "source": "./plugins/anteproyecto-uacj-latex",
+      "description": "Plantilla LaTeX genérica y reglas de compilación del Anteproyecto de Innovación Tecnológica de la MIAAD (UACJ): portada con logo, índices con «Figura N:», numeración continua, citas IEEE clicables, cronograma apaisado, validador estático y compilador con censo del log.",
+      "version": "1.0.0",
+      "category": "academic"
     }
   ]
 }

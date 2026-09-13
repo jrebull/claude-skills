@@ -9,6 +9,7 @@ Dentro de Claude Code:
 ```
 /plugin marketplace add jrebull/claude-skills
 /plugin install auditar-articulo-cientifico@jrebull-skills
+/plugin install anteproyecto-uacj-latex@jrebull-skills
 ```
 
 Para traer cambios posteriores:
@@ -48,3 +49,22 @@ auditoría con las trampas de maquetación ya resueltas.
 **Sin dependencias:** los scripts de `references/` son Python 3 de biblioteca
 estándar. No necesitan numpy, scipy ni statsmodels. La batería de regresión
 `references/probar.py` corre sin argumentos y devuelve código 1 si algo falla.
+
+### `anteproyecto-uacj-latex`
+
+Plantilla LaTeX **genérica** del *Anteproyecto de Innovación Tecnológica* (MIAAD, UACJ) con el
+formato completo: clase `report` carta 12 pt, Times, portada con logo, declaración, índices con
+«Figura N:» y «Tabla N:», numeración continua de figuras, tablas y ecuaciones, citas IEEE clicables
+(`\cita{n}`), cronograma semanal apaisado, referencias, apéndice y glosario. Compila con pdfLaTeX en
+tres pasadas con 0 errores y 0 overfull (`ejemplo_compilado.pdf`).
+
+Trae además `validar.py` (auditoría estática sin dependencias: balance de entornos, orden de citas,
+labels y figuras, y las trampas de babel-spanish y TikZ que rompen la compilación) y `compilar.sh`
+(tres pasadas + censo del log). `LEEME_companeros.md` explica el uso sin necesidad de Claude:
+
+```
+/anteproyecto-uacj-latex:anteproyecto-uacj-latex
+```
+
+**Sin Claude:** basta copiar `plantilla_anteproyecto.tex`, `Figures/`, `validar.py` y `compilar.sh`
+a un proyecto de Overleaf (compilador pdfLaTeX) y editar el bloque `DATOS DEL PROYECTO`.

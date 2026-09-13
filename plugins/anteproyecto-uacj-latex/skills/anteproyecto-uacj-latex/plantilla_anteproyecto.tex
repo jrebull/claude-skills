@@ -1,0 +1,621 @@
+% ============================================================
+% PLANTILLA GENÉRICA · Anteproyecto de Innovación Tecnológica
+% Maestría en Inteligencia Artificial y Analítica de Datos (MIAAD) · UACJ
+%
+% Cómo usarla:
+%   1. Edita SOLO el bloque «DATOS DEL PROYECTO» (justo debajo).
+%   2. Pon tus figuras en la carpeta Figures/ y referéncialas por nombre
+%      de archivo (sin ruta): \includegraphics{mi_figura.png}.
+%   3. Compila con pdflatex (Overleaf: compilador pdfLaTeX) TRES veces.
+%   4. Antes de entregar corre: python3 validar.py plantilla_anteproyecto.tex
+%
+% Reglas que este preámbulo ya resuelve (NO las toques):
+%   * clase report 12pt carta, márgenes 1.25in/1in, Times (mathptmx)
+%   * babel spanish con es-tabla y es-nodecimaldot (punto decimal)
+%   * figuras/tablas/ecuaciones numeradas de corrido: Figura 1, 2, 3…
+%   * capítulos sin la palabra «Capítulo»; secciones sin numeración
+%     automática (el número va escrito en el título: \section{1.1 …})
+%   * citas IEEE [n] clicables con \cita{n} + \label{bib:n}
+%   * índices con prefijo «Figura N:» / «Tabla N:»
+% ============================================================
+\documentclass[12pt,letterpaper]{report}
+
+% ============================================================
+% DATOS DEL PROYECTO  ← lo único que hay que editar para empezar
+% ============================================================
+\newcommand{\TituloProyecto}{TÍTULO DEL ANTEPROYECTO EN MAYÚSCULAS, DESCRIPTIVO Y SIN ABREVIATURAS}
+\newcommand{\NombreAutor}{Nombre Completo del Estudiante}
+\newcommand{\Matricula}{000000}
+\newcommand{\NombreAsesor}{Dr. Nombre del Asesor}
+\newcommand{\Instituto}{Instituto de Ingeniería y Tecnología}
+\newcommand{\Departamento}{Departamento de Ingeniería Eléctrica y Computación}
+\newcommand{\CiudadPortada}{Ciudad Juárez, Chihuahua}
+\newcommand{\FechaPortada}{Mayo 2026}
+
+% --- Paquetes (conjunto cerrado y probado; no añadir sin motivo) ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-tabla,es-nodecimaldot]{babel}
+% es-tabla: «Tabla» en vez de «Cuadro». es-nodecimaldot: el punto decimal se
+% respeta (3.14). NO añadir \shorthandoff{.}: rompe babel-spanish moderno.
+\usepackage{mathptmx}                    % Times New Roman
+\usepackage{microtype}                    % Justificación pareja
+\usepackage{ragged2e}                     % \RaggedRight con guionado
+\setlength{\emergencystretch}{3em}        % Menos overfull
+\usepackage[left=1.25in, right=1.25in, top=1in, bottom=1in]{geometry}
+\usepackage{setspace}                     % Interlineado
+\usepackage{graphicx}                     % Imágenes
+\graphicspath{{Figures/}}                 % TODAS las figuras viven en Figures/
+\usepackage{float}                        % [H] para fijar figuras
+\usepackage[table]{xcolor}                % Colores en tablas (rowcolor/cellcolor)
+\usepackage{titlesec}                     % Formato de títulos
+\usepackage{tocloft}                      % Formato de índices
+\usepackage{fancyhdr}                     % Pie de página
+\usepackage[hyphens]{url}                 % Quiebre de URLs largas
+\usepackage{hyperref}                     % Hipervínculos (sin recuadros)
+\usepackage[nottoc]{tocbibind}            % Listas en el índice
+\usepackage{caption}                      % Captions
+\captionsetup{
+    justification=centering,
+    font={small, color=gray},
+    labelfont={bf, color=gray},
+    format=plain
+}
+\usepackage{enumitem}                     % Listas con control fino
+\usepackage{multicol}                     % Glosario a dos columnas
+\usepackage{chngcntr}                     % Contadores continuos
+\usepackage{tikz}                         % Diagramas y fotos circulares
+\usetikzlibrary{arrows.meta, positioning, fit, backgrounds, shapes.geometric}
+\usepackage{amsmath}                      % Ecuaciones
+\usepackage{amssymb}                      % Símbolos
+\usepackage{pdflscape}                    % Hoja apaisada (cronograma)
+
+% --- Paleta del documento (cuatro nombres; cambia SOLO los valores HTML si quieres otra) ---
+% Se usan por nombre en tablas, figuras y cronograma: así una sola línea recolorea todo.
+\definecolor{colorprimario}{HTML}{2F5D50}     % verde bosque: cabeceras, bordes, títulos de bloque
+\definecolor{colorsecundario}{HTML}{E3B23C}   % ámbar: chips, hitos, acentos
+\definecolor{colorgris}{HTML}{5A5A5A}         % gris: pies de figura, notas
+\definecolor{colortexto}{HTML}{222222}        % texto dentro de figuras
+
+% --- hyperref sin recuadros de color ---
+\hypersetup{colorlinks=false, pdfborder={0 0 0}}
+
+% --- URLs que quiebran en cualquier carácter ---
+\makeatletter
+\g@addto@macro{\UrlBreaks}{\UrlOrds}
+\makeatother
+
+% --- Interlineado y párrafos ---
+% (La portada usa \begin{spacing}{1.2} y la firma \begin{spacing}{2.0}.
+%  NUNCA usar \doublespacing.)
+\setstretch{1.10}
+\setlength{\parskip}{0.4em}
+
+% ============================================================
+% Títulos (capítulo centrado 16pt; secciones en negritas sin número)
+% ============================================================
+\titleformat{\chapter}[display]{}{}{0pt}{\centering\fontsize{16pt}{19.2pt}\selectfont\bfseries}
+\titlespacing*{\chapter}{0pt}{-60pt}{24pt}
+\titleformat{\section}{\normalsize\bfseries}{}{0pt}{}
+\titlespacing*{\section}{0pt}{10pt}{6pt}
+\titleformat{\subsection}{\normalsize\bfseries}{}{0pt}{}
+\titlespacing*{\subsection}{0pt}{8pt}{4pt}
+
+% ============================================================
+% Índices (TOC, LOF, LOT) con prefijo «Figura N:» y «Tabla N:»
+% ============================================================
+\renewcommand{\cftchapfont}{\normalsize\bfseries}
+\renewcommand{\cftsecfont}{\normalsize}
+\renewcommand{\cftsubsecfont}{\normalsize}
+\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}}
+\setlength{\cftbeforechapskip}{3pt}
+\setlength{\cftbeforesecskip}{1pt}
+\renewcommand{\cftfigpresnum}{Figura~}
+\renewcommand{\cftfigaftersnum}{:}
+\setlength{\cftfignumwidth}{2.0cm}
+\renewcommand{\cfttabpresnum}{Tabla~}
+\renewcommand{\cfttabaftersnum}{:}
+\setlength{\cfttabnumwidth}{2.0cm}
+\setcounter{tocdepth}{2}
+
+% ============================================================
+% Pie de página con folio centrado, sin encabezado
+% ============================================================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\thepage}\renewcommand{\headrulewidth}{0pt}}
+
+% ============================================================
+% Sin la palabra «Capítulo»; numeración continua de figuras/tablas/ecuaciones
+% ============================================================
+\makeatletter
+\renewcommand{\@chapapp}{}
+\renewcommand{\thechapter}{}
+\makeatother
+\renewcommand{\thefigure}{\arabic{figure}}
+\renewcommand{\thetable}{\arabic{table}}
+\renewcommand{\theequation}{\arabic{equation}}
+\counterwithout{figure}{chapter}
+\counterwithout{table}{chapter}
+\counterwithout{equation}{chapter}
+\setcounter{secnumdepth}{0}   % los números de sección van escritos en el título
+
+% --- Citas IEEE clicables: \cita{7} → [7] enlazado a \label{bib:7} ---
+\newcommand{\cita}[1]{\hyperref[bib:#1]{[#1]}}
+
+% ============================================================
+\begin{document}
+% ============================================================
+
+% ------------------------------------------------------------
+% PORTADA (no tocar la estructura; los datos vienen del bloque de arriba)
+% ------------------------------------------------------------
+\begin{titlepage}
+\begin{spacing}{1.2}
+\setlength{\parskip}{0pt}
+\begin{center}
+{\fontsize{16pt}{19.2pt}\selectfont UNIVERSIDAD AUTÓNOMA DE CIUDAD JUÁREZ\par}
+\vspace{0.3cm}
+{\fontsize{14pt}{16.8pt}\selectfont \Instituto\par}
+\vspace{0.2cm}
+{\fontsize{14pt}{16.8pt}\selectfont \Departamento\par}
+\vspace{1.0cm}
+\includegraphics[width=4cm]{logouacj.png}\\
+\vspace{1.0cm}
+{\fontsize{12pt}{15pt}\selectfont\bfseries \TituloProyecto\par}
+\vspace{1.0cm}
+{\normalsize Anteproyecto de investigación presentado por:\par}
+\vspace{0.5cm}
+{\normalsize \NombreAutor\par}
+\vspace{0.2cm}
+{\normalsize Matrícula: \Matricula\par}
+\vspace{0.7cm}
+{\normalsize Requisito para la obtención del título de\par}
+\vspace{0.5cm}
+{\normalsize MAESTRO EN INTELIGENCIA ARTIFICIAL\par}
+{\normalsize Y ANALÍTICA DE DATOS\par}
+\vspace{0.7cm}
+{\normalsize Asesor:\par}
+\vspace{0.5cm}
+{\normalsize \NombreAsesor\par}
+\end{center}
+\vfill
+\noindent \CiudadPortada \hfill \FechaPortada
+\end{spacing}
+\end{titlepage}
+
+% ------------------------------------------------------------
+% PRELIMINARES en números romanos
+% ------------------------------------------------------------
+\pagenumbering{roman}
+\setcounter{page}{2}
+
+\chapter*{Declaración de Originalidad}
+\begin{spacing}{2.0}
+\noindent Yo, \NombreAutor, declaro que el material contenido en esta publicación fue generado con la revisión de los documentos que se mencionan en la sección de Referencias y que no ha sido utilizado para obtener otro título o reconocimiento en otra Institución de Educación Superior.
+\end{spacing}
+\begin{center}
+\vspace{2cm}
+% Si tienes tu firma escaneada en Figures/firma.png, descomenta la línea siguiente:
+% \includegraphics[height=2.5cm]{firma.png}\\[-0.2cm]
+\rule{6cm}{0.4pt}\\
+\NombreAutor
+\end{center}
+\clearpage
+
+\chapter*{Índice de contenido}
+\vspace{0.3cm}
+\begingroup\setlength{\parskip}{0pt}\makeatletter\@starttoc{toc}\makeatother\endgroup
+\clearpage
+
+\chapter*{Índice de figuras}
+\vspace{0.3cm}
+\begingroup\setlength{\parskip}{0pt}\makeatletter\@starttoc{lof}\makeatother\endgroup
+\clearpage
+
+\chapter*{Índice de tablas}
+\vspace{0.3cm}
+\begingroup\setlength{\parskip}{0pt}\makeatletter\@starttoc{lot}\makeatother\endgroup
+\clearpage
+
+% ------------------------------------------------------------
+% RESUMEN (autocontenido: sin citas ni referencias cruzadas; ~200 palabras)
+% ------------------------------------------------------------
+\chapter*{Resumen}
+\addcontentsline{toc}{chapter}{Resumen}
+
+El presente anteproyecto planteará el \textbf{desarrollo e implementación de} [producto o sistema] para [problema concreto y población beneficiada]. \textbf{El objetivo general será} [verbo aplicado: desarrollar, implementar, construir] [qué], evaluado mediante [métricas]. \textbf{La metodología adoptada será} [CRISP-DM, KDD, TDSP, SEMMA o ASUM-DM], instrumentada con [validación]. El alcance se organizará en [niveles o etapas]. El proyecto se materializará en \textbf{[n] entregables tangibles}: (i)~[entregable 1], (ii)~[entregable 2] y (iii)~[entregable 3].
+
+\clearpage
+
+% ------------------------------------------------------------
+% CUERPO en números arábigos
+% ------------------------------------------------------------
+\pagenumbering{arabic}
+
+\chapter{Introducción}
+
+Contexto general del problema en dos o tres párrafos. Cierra con un párrafo que anuncie la estructura del documento: el Capítulo~I plantea el problema, el Capítulo~II presenta el marco teórico y tecnológico, el Capítulo~III describe el producto esperado y su validación, el Capítulo~IV detalla la metodología y, por último, se presenta el cronograma de actividades.
+
+% ============================================================
+\chapter{I. Planteamiento del problema}
+% ============================================================
+
+\section{1.1 Antecedentes}
+
+Estado del arte con citas IEEE por orden de aparición: la primera fuente que se cite es la \cita{1}, la segunda la \cita{2}, y así sucesivamente. Nunca se reutiliza un número ni se cita sin entrada en Referencias. Los acrónimos se definen una sola vez en su primera aparición con el patrón: aprendizaje automático (\textit{Machine Learning}, ML).
+
+La Tabla~\ref{tab:antecedentes} sintetiza los trabajos relacionados.
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \arrayrulecolor{colorprimario}
+    \setlength{\arrayrulewidth}{0.7pt}
+    \setlength{\tabcolsep}{4pt}
+    \begin{tabular}{>{\raggedright\arraybackslash}p{3.0cm}
+                    >{\raggedright\arraybackslash}p{4.2cm}
+                    >{\raggedright\arraybackslash}p{5.6cm}}
+        \hline
+        \rowcolor{colorprimario!90}
+        \textcolor{white}{\textbf{Fuente}} &
+        \textcolor{white}{\textbf{Técnica o enfoque}} &
+        \textcolor{white}{\textbf{Utilidad para el proyecto}} \\
+        \hline
+        \rowcolor{colorprimario!8}
+        Autor \textit{et al.} \cita{1} & Técnica aplicada & Qué aporta a este proyecto. \\
+        Autor \cita{2} & Técnica aplicada & Qué aporta a este proyecto. \\
+        \rowcolor{colorprimario!8}
+        Autor \textit{et al.} \cita{3} & Técnica aplicada & Qué aporta a este proyecto. \\
+        \hline
+    \end{tabular}
+    \arrayrulecolor{black}
+    \caption[Trabajos relacionados.]{Síntesis de trabajos relacionados y su utilidad para el proyecto. Fuente: elaboración propia.}
+    \label{tab:antecedentes}
+\end{table}
+
+\section{1.2 Descripción del problema}
+
+Qué falta hoy, qué consecuencia tiene y qué necesidad concreta atiende el proyecto. Cifras con punto decimal (por ejemplo, un crecimiento del 12.5\,\%) y millares con coma (12,345 registros). El signo de porcentaje va SIEMPRE en modo texto, nunca dentro de una fórmula: por ejemplo, menos del $<$\,0.5\,\% de los casos.
+
+\section{1.3 Objetivos}
+
+\subsection{1.3.1 Objetivo general}
+
+Desarrollar e implementar [qué] para [para qué], considerando [dimensiones].
+
+\subsection{1.3.2 Objetivos específicos}
+
+\begin{enumerate}[label=\textbf{OE~\arabic*.}, leftmargin=1.6cm]
+    \item Construir [base de datos o insumo].
+    \item Caracterizar [comportamiento o fenómeno].
+    \item Implementar y comparar [modelos o técnicas].
+    \item Evaluar [desempeño] bajo [protocolo de validación].
+    \item Entregar [demostrador o aplicación].
+\end{enumerate}
+
+La Figura~\ref{fig:objetivos} resume los objetivos específicos y el producto de cada uno.
+
+% Patrón de píldoras numeradas: círculo con el número + bloque de texto + etiqueta de producto.
+% Geometría: 3 columnas de 4.5cm a paso 4.9cm (total 14.3cm; textwidth = 15.24cm).
+% ⚠️ En TikZ NUNCA usar «shorten <=» ni «shorten >=»: babel-spanish activa < y >.
+%    Para acortar flechas usar ([xshift=Npt]a.east) -- ([xshift=-Npt]b.west).
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        font=\footnotesize,
+        every node/.style={align=center, inner sep=0pt, outer sep=0pt},
+        num/.style={circle, fill=colorprimario, text=white, font=\large\bfseries,
+                    minimum size=0.9cm, anchor=north},
+        txt/.style={text=colortexto, font=\scriptsize, text width=4.2cm, minimum height=1.5cm,
+                    anchor=north},
+        prod/.style={rectangle, rounded corners=8pt, fill=colorsecundario!35, draw=colorsecundario,
+                     line width=0.5pt, font=\scriptsize\bfseries, text=colortexto,
+                     minimum width=3.8cm, minimum height=0.65cm, text width=3.6cm, anchor=north},
+        linea/.style={draw=colorprimario!50, line width=0.6pt},
+        foot/.style={font=\scriptsize\itshape, text=colorgris, anchor=north}
+    ]
+        \foreach \i/\x/\titulo/\texto/\prodtxt in {
+            1/0/Construir/{Descripción breve del objetivo específico uno.}/{Producto: conjunto de datos},
+            2/4.9/Implementar/{Descripción breve del objetivo específico dos.}/{Producto: modelo},
+            3/9.8/Entregar/{Descripción breve del objetivo específico tres.}/{Producto: aplicación}} {
+            \node[num] (n\i) at (\x, 0) {\i};
+            \node[txt] at (\x, -1.15) {\textbf{\textcolor{colorprimario}{\titulo}}\\[2pt]\texto};
+            \node[prod] (p\i) at (\x, -2.85) {\prodtxt};
+        }
+        \draw[linea] ([xshift=2pt]n1.east) -- ([xshift=-2pt]n2.west);
+        \draw[linea] ([xshift=2pt]n2.east) -- ([xshift=-2pt]n3.west);
+        \node[foot] at (4.9, -3.9) {Cada objetivo específico liga con un producto verificable.};
+    \end{tikzpicture}
+    \caption[Objetivos específicos y sus productos.]{Objetivos específicos del proyecto y el producto verificable asociado a cada uno. Fuente: elaboración propia.}
+    \label{fig:objetivos}
+\end{figure}
+
+\section{1.4 Justificación}
+
+Por qué el problema importa, a quién beneficia y por qué el enfoque propuesto es adecuado. Tono profesionalizante: verbos aplicados (desarrollar, implementar, construir, entregar); sin promesas de contribución teórica.
+
+\section{1.5 Hipótesis y preguntas de investigación}
+
+\textbf{Hipótesis cualitativa 1.} Se espera que [afirmación blanda, sin umbrales numéricos comprometidos].
+
+\textbf{Pregunta 1.} ¿Qué [pregunta abierta, nunca de sí/no]?
+
+% ============================================================
+\chapter{II. Marco Teórico y Tecnológico}
+% ============================================================
+
+\section{2.1 Marco teórico}
+
+\subsection{2.1.1 Concepto fundamental}
+
+Definir los conceptos con sus símbolos la primera vez que aparecen. Las ecuaciones se numeran de corrido, sin punto de capítulo: la Ecuación~\eqref{eq:mase} define la métrica MASE (\textit{Mean Absolute Scaled Error}) como
+\begin{equation}
+    \text{MASE} = \frac{\frac{1}{H}\sum_{h=1}^{H} \lvert y_{t+h} - \hat{y}_{t+h} \rvert}{\frac{1}{T-m}\sum_{t=m+1}^{T} \lvert y_t - y_{t-m} \rvert},
+    \label{eq:mase}
+\end{equation}
+donde $H$ es el horizonte, $T$ la longitud de la serie de entrenamiento y $m$ el periodo estacional. Las métricas se definen con fórmula UNA sola vez; el resto del documento las nombra y remite a esta sección.
+
+\subsection{2.1.2 Segundo concepto}
+
+Texto.
+
+\section{2.2 Marco tecnológico}
+
+\subsection{2.2.1 Herramientas y bibliotecas}
+
+Solo tecnología (lenguajes, bibliotecas, infraestructura). Lo ético y lo metodológico van en sus capítulos.
+
+% ============================================================
+\chapter{III. Producto esperado y validación}
+% ============================================================
+
+\section{3.1 Producto esperado}
+
+Qué se entrega: sistema, dataset, aplicación de demostración. Sin comprometer interfaces concretas ni identificadores externos (DOI) como entregable.
+
+\section{3.2 Entregables tangibles}
+
+\begin{enumerate}[label=\textbf{E\arabic*.}, leftmargin=1.2cm]
+    \item Entregable uno.
+    \item Entregable dos.
+    \item Entregable tres.
+\end{enumerate}
+
+\section{3.3 Validación}
+
+Cómo se validará cada entregable (protocolo, métricas nombradas, niveles de éxito). Las pruebas estadísticas y los hiperparámetros se describen en el Capítulo~IV, no aquí.
+
+% ============================================================
+\chapter{IV. Metodología}
+% ============================================================
+
+La metodología nominada es [CRISP-DM \cita{3} / KDD / TDSP / SEMMA / ASUM-DM]. La Figura~\ref{fig:metodologia} muestra el mapeo entre sus fases y las del proyecto.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        font=\footnotesize,
+        every node/.style={align=center},
+        fase/.style={rectangle, rounded corners=4pt, draw=colorprimario, line width=0.8pt, fill=colorsecundario!18,
+                     minimum width=2.5cm, minimum height=1.1cm, text width=2.3cm},
+        flecha/.style={-{Stealth[length=2.4mm,width=1.8mm]}, draw=colorprimario!55, line width=0.7pt}
+    ]
+        % 5 nodos de 2.5cm a paso 3.0cm = 14.5cm de ancho total (textwidth = 15.24cm)
+        \node[fase] (f1) at (0,0) {\textbf{Fase 1}\\Comprensión};
+        \node[fase] (f2) at (3.0,0) {\textbf{Fase 2}\\Datos};
+        \node[fase] (f3) at (6.0,0) {\textbf{Fase 3}\\Modelado};
+        \node[fase] (f4) at (9.0,0) {\textbf{Fase 4}\\Evaluación};
+        \node[fase] (f5) at (12.0,0) {\textbf{Fase 5}\\Despliegue};
+        \draw[flecha] ([xshift=2pt]f1.east) -- ([xshift=-2pt]f2.west);
+        \draw[flecha] ([xshift=2pt]f2.east) -- ([xshift=-2pt]f3.west);
+        \draw[flecha] ([xshift=2pt]f3.east) -- ([xshift=-2pt]f4.west);
+        \draw[flecha] ([xshift=2pt]f4.east) -- ([xshift=-2pt]f5.west);
+    \end{tikzpicture}
+    \caption[Fases de la metodología.]{Fases de la metodología adoptada y su correspondencia con las etapas del proyecto. Fuente: elaboración propia.}
+    \label{fig:metodologia}
+\end{figure}
+
+\section{4.1 Fase 1: comprensión del problema}
+
+Actividades y productos.
+
+\section{4.2 Fase 2: datos}
+
+Actividades y productos.
+
+\section{4.3 Fase 3: modelado}
+
+Actividades, selección de hiperparámetros y prevención de fugas de información.
+
+\section{4.4 Fase 4: evaluación}
+
+Protocolo de validación, comparación estadística entre modelos y criterios de éxito.
+
+\section{4.5 Fase 5: despliegue}
+
+Actividades y productos.
+
+\section{4.6 Riesgos}
+
+La Tabla~\ref{tab:riesgos} resume los riesgos identificados y su mitigación.
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \arrayrulecolor{colorprimario}
+    \setlength{\arrayrulewidth}{0.7pt}
+    \begin{tabular}{>{\raggedright\arraybackslash}p{4.0cm} c >{\raggedright\arraybackslash}p{6.4cm}}
+        \hline
+        \rowcolor{colorprimario!90}
+        \textcolor{white}{\textbf{Riesgo}} & \textcolor{white}{\textbf{Probabilidad}} & \textcolor{white}{\textbf{Mitigación}} \\
+        \hline
+        \rowcolor{colorprimario!8}
+        Riesgo uno & Media & Cómo se mitiga. \\
+        Riesgo dos & Baja & Cómo se mitiga. \\
+        \hline
+    \end{tabular}
+    \arrayrulecolor{black}
+    \caption[Riesgos y mitigación.]{Riesgos identificados del proyecto y su estrategia de mitigación. Fuente: elaboración propia.}
+    \label{tab:riesgos}
+\end{table}
+
+% ============================================================
+\chapter{Cronograma de actividades}
+% ============================================================
+
+El cronograma cubre \textbf{diez meses} de trabajo activo (agosto de 2026 a mayo de 2027) con un receso en diciembre, en granularidad \textbf{semanal}. La Tabla~\ref{tab:hitos} enumera los hitos verificables y la Tabla~\ref{tab:cronograma} el plan semanal completo.
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \arrayrulecolor{colorprimario}
+    \setlength{\arrayrulewidth}{0.7pt}
+    \setlength{\tabcolsep}{4pt}
+    \begin{tabular}{>{\raggedright\arraybackslash}p{2.0cm}
+                    >{\raggedright\arraybackslash}p{4.0cm}
+                    >{\raggedright\arraybackslash}p{6.4cm}}
+        \hline
+        \rowcolor{colorprimario!90}
+        \textcolor{white}{\textbf{Mes}} & \textcolor{white}{\textbf{Hito}} & \textcolor{white}{\textbf{Producto verificable}} \\
+        \hline
+        \rowcolor{colorprimario!8}
+        Nov 2026 & Cierre de PI-I & Documento entregable de PI-I revisado por el asesor. \\
+        Abr 2027 & Cierre de PI-II & Documento entregable de PI-II revisado por el asesor. \\
+        \rowcolor{colorprimario!8}
+        May 2027 & \textbf{Defensa} & Manuscrito final y productos publicados. \\
+        \hline
+    \end{tabular}
+    \arrayrulecolor{black}
+    \caption[Hitos del cronograma.]{Hitos del cronograma y sus productos verificables. Fuente: elaboración propia.}
+    \label{tab:hitos}
+\end{table}
+
+% Hoja apaisada. NO usar \begin{table}[H] dentro de landscape (genera una hoja en
+% blanco); se usa \captionof{table} y una minipage centrada de altura \textheight.
+% Cada fila tiene 1 celda de actividad + 40 celdas semanales (40 separadores '&').
+\begin{landscape}
+\thispagestyle{empty}
+\noindent\begin{minipage}[c][\textheight][c]{\linewidth}
+\centering
+{\large\bfseries\color{colorprimario} Cuadro de actividades}\par
+\vspace{0.6em}
+\scriptsize
+\arrayrulecolor{colorprimario}
+\setlength{\arrayrulewidth}{0.4pt}
+\setlength{\tabcolsep}{2pt}
+\renewcommand{\arraystretch}{1.15}
+\resizebox{\linewidth}{!}{%
+    \begin{tabular}{|>{\raggedright\arraybackslash}p{4.6cm}|*{10}{cccc|}}
+        \hline
+        \multicolumn{1}{|c|}{\cellcolor{colorprimario!90}}
+        & \multicolumn{4}{c|}{\cellcolor{colorprimario!90}\textcolor{white}{\textbf{Ago'26}}}
+        & \multicolumn{4}{c|}{\cellcolor{colorprimario!90}\textcolor{white}{\textbf{Sep'26}}}
+        & \multicolumn{4}{c|}{\cellcolor{colorprimario!90}\textcolor{white}{\textbf{Oct'26}}}
+        & \multicolumn{4}{c|}{\cellcolor{colorprimario!90}\textcolor{white}{\textbf{Nov'26}}}
+        & \multicolumn{4}{c|}{\cellcolor{colorprimario!90}\textcolor{white}{\textbf{Dic'26}}}
+        & \multicolumn{4}{c|}{\cellcolor{colorprimario!90}\textcolor{white}{\textbf{Ene'27}}}
+        & \multicolumn{4}{c|}{\cellcolor{colorprimario!90}\textcolor{white}{\textbf{Feb'27}}}
+        & \multicolumn{4}{c|}{\cellcolor{colorprimario!90}\textcolor{white}{\textbf{Mar'27}}}
+        & \multicolumn{4}{c|}{\cellcolor{colorprimario!90}\textcolor{white}{\textbf{Abr'27}}}
+        & \multicolumn{4}{c|}{\cellcolor{colorprimario!90}\textcolor{white}{\textbf{May'27}}}
+        \\ \hline
+
+        \multicolumn{1}{|c|}{\cellcolor{colorprimario!90}\textcolor{white}{\textbf{Actividad}}}
+        & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S1} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S2} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S3} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S4} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S1} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S2} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S3} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S4} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S1} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S2} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S3} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S4} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S1} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S2} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S3} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S4} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S1} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S2} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S3} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S4} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S1} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S2} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S3} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S4} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S1} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S2} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S3} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S4} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S1} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S2} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S3} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S4} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S1} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S2} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S3} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S4} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S1} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S2} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S3} & \cellcolor{colorprimario!90}\textcolor{white}{\scriptsize S4} \\
+        \hline
+
+        \multicolumn{41}{|l|}{\cellcolor{colorsecundario!40}\textbf{Proyecto de Innovación Tecnológica I (ago.--nov.~2026)} \hfill \textbf{Receso (dic.)} \hfill \textbf{Proyecto de Innovación Tecnológica II (ene.--may.~2027)}} \\
+        \hline
+        Comprensión del negocio y revisión de literatura
+        & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} &  &  &  &  &  &  &  &  &  &  & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\
+        \hline
+        Obtención y preparación de los datos
+        &  &  & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} &  &  &  &  &  &  & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\
+        \hline
+        Análisis exploratorio
+        &  &  &  &  &  &  &  & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} &  &  & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\
+        \hline
+        Diseño e implementación de modelos
+        &  &  &  &  &  &  &  &  &  &  &  & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} &  &  &  &  &  &  &  &  &  &  &  &  \\
+        \hline
+        Evaluación y validación
+        &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} &  &  &  & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} &  &  &  &  &  &  \\
+        \hline
+        Despliegue del producto
+        &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} &  &  &  &  &  &  &  &  &  &  &  & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} & \cellcolor{colorprimario!60} &  &  \\
+        \hline
+        Redacción del reporte técnico
+        & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} & \cellcolor{colorprimario!22} \\
+        \hline
+        Revisión del entregable PI-I
+        &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & \cellcolor{colorsecundario!85} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\
+        \hline
+        Revisión del entregable PI-II
+        &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & \cellcolor{colorsecundario!85} &  &  &  &  \\
+        \hline
+        Presentación final y defensa
+        &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} & \cellcolor{colorgris!25} &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & \cellcolor{colorsecundario!85} \\
+        \hline
+
+    \end{tabular}%
+}%
+\arrayrulecolor{black}
+\captionsetup{hypcap=false}
+\captionof{table}[Cronograma semanal de actividades.]{Cronograma semanal del proyecto: 40~semanas activas más 4 de receso. Las celdas del color primario marcan las semanas activas de cada actividad, las del secundario los hitos académicos y las grises el receso. Fuente: elaboración propia.}
+\label{tab:cronograma}
+\end{minipage}
+\end{landscape}
+\clearpage
+
+% ============================================================
+% REFERENCIAS · estilo IEEE · numeradas por ORDEN DE PRIMERA APARICIÓN
+% Cada entrada lleva \label{bib:N} para que \cita{N} sea clicable.
+% ============================================================
+\chapter{Referencias}
+\begin{spacing}{1.05}
+\footnotesize
+\sloppy
+\hbadness=10000
+\emergencystretch=3em
+\begin{enumerate}[label={[\arabic*]}, leftmargin=0.9cm, labelsep=0.3cm, itemsep=4pt, parsep=0pt, topsep=0pt]
+    \item \label{bib:1} A. Apellido, B. Apellido y C. Apellido, ``Título del artículo,'' \textit{Nombre de la Revista}, vol.~12, n.º~3, pp.~45--67, 2024, doi: 10.0000/xxxxx.
+    \item \label{bib:2} D. Apellido, \textit{Título del libro}, 2.ª ed. Ciudad, País: Editorial, 2021.
+    \item \label{bib:3} P. Chapman \textit{et al.}, ``CRISP-DM 1.0: Step-by-step data mining guide,'' SPSS Inc., 2000. [En línea]. Disponible en: \url{https://www.the-modeling-agency.com/crisp-dm.pdf}
+\end{enumerate}
+\end{spacing}
+
+% ============================================================
+% APÉNDICES (sin numeración de capítulo)
+% ============================================================
+\chapter*{Apéndice A. Recursos del proyecto}
+\addcontentsline{toc}{chapter}{Apéndice A. Recursos del proyecto}
+
+\section*{A.1 Repositorio}
+Dirección del repositorio y licencia.
+
+\section*{A.2 Reproducibilidad}
+Cómo reproducir los resultados (entorno, órdenes, datos).
+
+% ============================================================
+% GLOSARIO a dos columnas
+% ============================================================
+\chapter*{Glosario}
+\addcontentsline{toc}{chapter}{Glosario}
+\begin{multicols}{2}
+\setlength{\columnsep}{14pt}
+\scriptsize
+\sloppy
+\hbadness=10000
+\emergencystretch=3em
+\begin{description}[leftmargin=0pt, labelindent=0pt, itemindent=0pt, labelsep=0.4em,
+                    font=\bfseries\scriptsize, itemsep=2pt, parsep=0pt, topsep=0pt]
+    \item[MASE] (\textit{Mean Absolute Scaled Error})\hspace{0.3em}Error absoluto medio escalado por el error del pronóstico ingenuo; comparable entre series de distinta escala.
+    \item[ML] (\textit{Machine Learning})\hspace{0.3em}Aprendizaje automático: familia de métodos que ajustan modelos a partir de datos.
+    \item[Walk-forward] Validación temporal con ventana de entrenamiento expansible y evaluación sobre observaciones posteriores.
+\end{description}
+\end{multicols}
+
+\end{document}
